@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve(`${__dirname}/../hosted/index.html`));
 });
 
-const server = http .createServer(app);
+const server = http.createServer(app);
 
 const io = socketio(server);
 

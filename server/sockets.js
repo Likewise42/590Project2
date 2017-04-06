@@ -7,8 +7,8 @@ const setupSockets = (ioServer) => {
 
   io.on('connection', (sock) => {
     const socket = sock;
-    
-    console.log("user joined");
+
+    console.log('user joined');
 
     socket.join('room1');
 
@@ -16,11 +16,11 @@ const setupSockets = (ioServer) => {
 
     socket.hash = hash;
 
-    socket.on('disconnect', (data)=>{
-      
+    socket.on('disconnect', (data) => {
+      console.log(data);
       socket.leave('room1');
     });
   });
-}
+};
 
 module.exports.setupSockets = setupSockets;
