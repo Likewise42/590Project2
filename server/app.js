@@ -4,7 +4,6 @@ const path = require('path');
 const express = require('express');
 const socketio = require('socket.io');
 const sockets = require('./sockets.js');
-const physics = require('./physics.js');
 
 const PORT = process.env.PORT || process.env.NODE_PORT || 3000;
 
