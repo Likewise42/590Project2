@@ -15,25 +15,22 @@ const init = () => {
   socket = io.connect();
 
   body.onmousemove = onMouseMove;
-  
+
   canvas.onclick = onCanvasClick;
 
   drawList.leftPaddle = new Paddle(canvas.width/10,canvas.height/2);
   drawList.rightPaddle = new Paddle((canvas.width/10)*9,canvas.height/2);
+
+  drawList.puck1 = new Puck(canvas.height/2);
 
   window.requestAnimationFrame(update);
 }
 window.onload = init;
 
 const onMouseMove = (e) =>{
-  console.log(e.offsetY);
-  
-  drawList.leftPaddle.y = e.offsetY;
-  if(drawList.leftPaddle.y >500){
-    drawList.leftPaddle.y = 500;
-  } else if(drawList.leftPaddle.y < 0){
-    drawList.leftPaddle.y = 0;
-  }
+  const newOffsetY = e.y - canvas.offsetTop;
+
+  drawList.leftPaddle.y = newOffsetY;
 }
 
 const onCanvasClick = (e) =>{
@@ -54,15 +51,49 @@ const onCanvasClick = (e) =>{
 
 const draw = () => {
   ctx.save();
+  
+  drawMainLine();
+  
+  drawScore();
+  
   const keys = Object.keys(drawList);
 
   for(let i=0; i<keys.length; i++){
     const toDraw = drawList[keys[i]];
 
     toDraw.drawThis();
-
   }
 
+  ctx.restore();
+}
+
+const drawMainLine = () =>{
+  ctx.save();
+
+  ctx.setLineDash([10]);
+
+  ctx.strokeStyle = "white";
+  
+  ctx.moveTo(canvas.width/2,0);
+  ctx.lineTo(canvas.width/2, canvas.height);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+const drawScore = () =>{
+  ctx.save();
+  
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.textAlign = "center";
+  
+  //left
+  ctx.fillText(drawList.leftPaddle.score.toString(),canvas.width/2 - 25, 25);
+  
+  //right
+  ctx.fillText(drawList.rightPaddle.score.toString(),canvas.width/2 + 25, 25);
+  
   ctx.restore();
 }
 
@@ -80,7 +111,7 @@ const titleScreen = () =>{
 
 const gameplay = () =>{
   ctx.save();
-  
+
   draw();
 
   ctx.restore();
