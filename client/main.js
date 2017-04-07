@@ -26,7 +26,7 @@ const init = () => {
 window.onload = init;
 
 const onMouseMove = (e) =>{
-  //console.log(e.offsetY);
+  console.log(e.offsetY);
   
   drawList.leftPaddle.y = e.offsetY;
   if(drawList.leftPaddle.y >500){

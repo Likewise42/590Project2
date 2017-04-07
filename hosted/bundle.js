@@ -27,7 +27,7 @@ var init = function init() {
 window.onload = init;
 
 var onMouseMove = function onMouseMove(e) {
-  //console.log(e.offsetY);
+  console.log(e.offsetY);
 
   drawList.leftPaddle.y = e.offsetY;
   if (drawList.leftPaddle.y > 500) {
