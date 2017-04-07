@@ -98,7 +98,7 @@ class Puck{
     if(lPaddleXBool && lPaddleYBool){
       this.flipX();
       
-      const newY = (this.y-lPaddle.y)/lPaddle.height;
+      const newY = ((this.y-lPaddle.y)/lPaddle.height)*3;
       
       this.velocityY = newY;
     }
@@ -111,6 +111,10 @@ class Puck{
     const rPaddleYBool = this.y-(this.height/2) <= rPaddle.y+(rPaddle.height/2) && this.y+(this.height/2) >= rPaddle.y-(rPaddle.height/2);
     if(rPaddleXBool && rPaddleYBool){
       this.flipX();
+      
+      const newY = ((this.y-rPaddle.y)/rPaddle.height)*3;
+      
+      this.velocityY = newY;
     }
   }
 

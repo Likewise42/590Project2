@@ -3,8 +3,8 @@ class Paddle{
     this.x = xPos;
     this.y = yPos;
 
-    this.width = canvas.width/60;
-    this.height = canvas.height/6;
+    this.width = canvas.width/100;
+    this.height = canvas.height/8;
     
     this.score = 0;
   }

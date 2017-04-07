@@ -17,3 +17,16 @@ canvas {
 .well{
   text-align: center;
 }
+
+#playerVSRow{
+  visibility: hidden;
+}
+
+#joinHostRow{
+  display: none;
+}
+
+#nameAlert{
+  display: none;
+  margin-top: 10px;
+}
