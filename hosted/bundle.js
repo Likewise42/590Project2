@@ -1,180 +1,3 @@
-'use strict';
-
-var body = void 0;
-var canvas = void 0;
-var ctx = void 0;
-var socket = void 0;
-var hash = void 0;
-var currentScene = "gameplay";
-var drawList = {};
-
-var init = function init() {
-  //socket stuff
-  socket = io.connect();
-
-  socket.on('connect', function () {
-    console.log('connected to the server');
-
-    document.querySelector("#usernameButton").onclick = joinButton;
-
-    socket.on('nameValid', function (data) {
-      document.querySelector("#usernameRow").style.display = "none";
-      document.querySelector("#nameAlert").style.display = "none";
-      document.querySelector("#joinHostRow").style.display = "block";
-    });
-
-    socket.on('nameInvalid', function (data) {
-      document.querySelector("#nameAlert").style.display = "block";
-    });
-  });
-
-  body = document.querySelector('body');
-  canvas = document.querySelector('#canvas');
-  ctx = canvas.getContext('2d');
-
-  body.onmousemove = onMouseMove;
-
-  //  canvas.onclick = onCanvasClick;
-
-  drawList.leftPaddle = new Paddle(canvas.width / 10, canvas.height / 2);
-  drawList.rightPaddle = new Paddle(canvas.width / 10 * 9, canvas.height / 2);
-
-  drawList.puck1 = new Puck(canvas.height / 2);
-
-  window.requestAnimationFrame(update);
-};
-window.onload = init;
-
-var joinButton = function joinButton() {
-  if (document.querySelector("#usernameField").value.indexOf('<') > -1) {
-    alert("Invalid Character!");
-    return;
-  }
-
-  if (document.querySelector("#usernameField").value) {
-    socket.emit('join', {
-      name: document.querySelector("#usernameField").value
-    });
-  } else {
-    alert("You must enter a username!");
-  }
-};
-
-var onMouseMove = function onMouseMove(e) {
-  var newOffsetY = e.y - canvas.offsetTop;
-
-  drawList.leftPaddle.y = newOffsetY;
-};
-
-//const onCanvasClick = (e) =>{
-//  ctx.save();
-//  //console.dir(e);
-//
-//  //use offsetX and offsetY
-//  //  ctx.fillStyle = "red";
-//  //  ctx.fillRect(e.offsetX,e.offsetY,20,20);
-//
-//
-//  if (currentScene === "title"){
-//    currentScene = "gameplay";
-//  }
-//
-//  ctx.restore();
-//}
-
-var draw = function draw() {
-  ctx.save();
-
-  drawMainLine();
-
-  drawScore();
-
-  var keys = Object.keys(drawList);
-
-  for (var i = 0; i < keys.length; i++) {
-    var toDraw = drawList[keys[i]];
-
-    toDraw.drawThis();
-  }
-
-  ctx.restore();
-};
-
-var drawMainLine = function drawMainLine() {
-  ctx.save();
-
-  ctx.setLineDash([10]);
-
-  ctx.strokeStyle = "white";
-
-  ctx.moveTo(canvas.width / 2, 0);
-  ctx.lineTo(canvas.width / 2, canvas.height);
-  ctx.stroke();
-
-  ctx.restore();
-};
-
-var drawScore = function drawScore() {
-  ctx.save();
-
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
-
-  //left
-  ctx.fillText(drawList.leftPaddle.score.toString(), canvas.width / 2 - 25, 25);
-
-  //right
-  ctx.fillText(drawList.rightPaddle.score.toString(), canvas.width / 2 + 25, 25);
-
-  ctx.restore();
-};
-
-var findScreen = function findScreen() {
-  ctx.save();
-
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Find a room to start", canvas.width / 2, canvas.height / 2);
-
-  ctx.restore();
-};
-
-var waitScreen = function waitScreen() {
-  ctx.save();
-
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Waiting for game to start...", canvas.width / 2, canvas.height / 2);
-
-  ctx.restore();
-};
-
-var gameplay = function gameplay() {
-  ctx.save();
-
-  draw();
-
-  ctx.restore();
-};
-
-var update = function update() {
-
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  if (currentScene === "find") {
-    findScreen();
-  } else if (currentScene === "gameplay") {
-    gameplay();
-  } else if (currentScene === "wait") {
-    waitScreen();
-  }
-
-  requestAnimationFrame(update);
-};
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -369,3 +192,183 @@ var Puck = function () {
 
   return Puck;
 }();
+'use strict';
+
+var body = void 0;
+var canvas = void 0;
+var ctx = void 0;
+var socket = void 0;
+var hash = void 0;
+var currentScene = "gameplay";
+var drawList = {};
+
+var init = function init() {
+  //socket stuff
+  socket = io.connect();
+
+  socket.on('connect', function () {
+    console.log('connected to the server');
+
+    document.querySelector("#usernameButton").onclick = joinButton;
+
+    socket.on('nameValid', function (data) {
+      document.querySelector("#usernameRow").style.display = "none";
+      document.querySelector("#nameAlert").style.display = "none";
+      document.querySelector("#joinHostRow").style.display = "block";
+    });
+
+    socket.on('nameInvalid', function (data) {
+      document.querySelector("#nameAlert").style.display = "block";
+    });
+  });
+
+  body = document.querySelector('body');
+  canvas = document.querySelector('#canvas');
+  ctx = canvas.getContext('2d');
+
+  body.onmousemove = onMouseMove;
+
+  //  canvas.onclick = onCanvasClick;
+
+  drawList.leftPaddle = new Paddle(canvas.width / 10, canvas.height / 2);
+  drawList.rightPaddle = new Paddle(canvas.width / 10 * 9, canvas.height / 2);
+
+  drawList.puck1 = new Puck(canvas.height / 2);
+
+  window.requestAnimationFrame(update);
+};
+window.onload = init;
+
+var joinButton = function joinButton() {
+  if (document.querySelector("#usernameField").value.indexOf('<') > -1) {
+    alert("Invalid Character!");
+    return;
+  }
+
+  if (document.querySelector("#usernameField").value) {
+    socket.emit('join', {
+      name: document.querySelector("#usernameField").value
+    });
+  } else {
+    alert("You must enter a username!");
+  }
+};
+
+var onMouseMove = function onMouseMove(e) {
+  var newOffsetY = e.y - canvas.offsetTop;
+
+  drawList.leftPaddle.y = newOffsetY;
+};
+
+//const onCanvasClick = (e) =>{
+//  ctx.save();
+//  //console.dir(e);
+//
+//  //use offsetX and offsetY
+//  //  ctx.fillStyle = "red";
+//  //  ctx.fillRect(e.offsetX,e.offsetY,20,20);
+//
+//
+//  if (currentScene === "title"){
+//    currentScene = "gameplay";
+//  }
+//
+//  ctx.restore();
+//}
+
+var draw = function draw() {
+  ctx.save();
+
+  drawMainLine();
+
+  drawScore();
+
+  var keys = Object.keys(drawList);
+
+  console.log(keys.length);
+
+  for (var i = 0; i < keys.length; i++) {
+    var toDraw = drawList[keys[i]];
+
+    toDraw.drawThis();
+  }
+
+  ctx.restore();
+};
+
+var drawMainLine = function drawMainLine() {
+  ctx.save();
+
+  ctx.setLineDash([10]);
+
+  ctx.strokeStyle = "white";
+
+  ctx.beginpath();
+  ctx.moveTo(canvas.width / 2, 0);
+  ctx.lineTo(canvas.width / 2, canvas.height);
+  ctx.stroke();
+
+  ctx.restore();
+};
+
+var drawScore = function drawScore() {
+  ctx.save();
+
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.textAlign = "center";
+
+  //left
+  ctx.fillText(drawList.leftPaddle.score.toString(), canvas.width / 2 - 25, 25);
+
+  //right
+  ctx.fillText(drawList.rightPaddle.score.toString(), canvas.width / 2 + 25, 25);
+
+  ctx.restore();
+};
+
+var findScreen = function findScreen() {
+  ctx.save();
+
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Find a room to start", canvas.width / 2, canvas.height / 2);
+
+  ctx.restore();
+};
+
+var waitScreen = function waitScreen() {
+  ctx.save();
+
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Waiting for game to start...", canvas.width / 2, canvas.height / 2);
+
+  ctx.restore();
+};
+
+var gameplay = function gameplay() {
+  ctx.save();
+
+  draw();
+
+  ctx.restore();
+};
+
+var update = function update() {
+
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (currentScene === "find") {
+    findScreen();
+  } else if (currentScene === "gameplay") {
+    gameplay();
+  } else if (currentScene === "wait") {
+    waitScreen();
+  }
+
+  requestAnimationFrame(update);
+};

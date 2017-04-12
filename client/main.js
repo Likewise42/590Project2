@@ -91,6 +91,8 @@ const draw = () => {
 
   const keys = Object.keys(drawList);
 
+	console.log(keys.length);
+	
   for(let i=0; i<keys.length; i++){
     const toDraw = drawList[keys[i]];
 
@@ -107,6 +109,7 @@ const drawMainLine = () =>{
 
   ctx.strokeStyle = "white";
 
+	ctx.beginpath();
   ctx.moveTo(canvas.width/2,0);
   ctx.lineTo(canvas.width/2, canvas.height);
   ctx.stroke();
