@@ -3,67 +3,108 @@ let canvas;
 let ctx;
 let socket;
 let hash;
-let currentScene = "gameplay";
+let currentScene = "find";
 let drawList = {};
 
 
 const init = () => {
-  //socket stuff
-  socket = io.connect();
+	//socket stuff
+	socket = io.connect();
 
-  socket.on('connect', ()=>{
-    console.log('connected to the server');
+	socket.on('connect', ()=>{
+		console.log('connected to the server');
 
-    document.querySelector("#usernameButton").onclick = joinButton;
+		document.querySelector("#usernameButton").onclick = joinButton;
+		document.querySelector("#joinRoomButton").onclick = joinRoomButton;
+		document.querySelector("#hostRoomButton").onclick = hostRoomButton;
 
-    socket.on('nameValid', (data)=>{
-      document.querySelector("#usernameRow").style.display = "none";
-      document.querySelector("#nameAlert").style.display = "none";
-      document.querySelector("#joinHostRow").style.display = "block";
-    });
+		socket.on('nameValid', (data)=>{
+			document.querySelector("#usernameRow").style.display = "none";
+			document.querySelector("#nameAlert").style.display = "none";
+			document.querySelector("#joinHostRow").style.display = "block";
+		});
 
-    socket.on('nameInvalid', (data)=>{
-      document.querySelector("#nameAlert").style.display = "block";
-    });
-  });
+		socket.on('nameInvalid', (data)=>{
+			document.querySelector("#nameAlert").style.display = "block";
+		});
 
-  body = document.querySelector('body');
-  canvas = document.querySelector('#canvas');
-  ctx = canvas.getContext('2d');
+		socket.on('roomHosted',(data)=>{
+			console.log(data);
+			document.querySelector("#joinHostRow").style.display = "none";
+			document.querySelector("#playerVSRow").style.visibility = "visible";
+		});
+	});
 
-  body.onmousemove = onMouseMove;
+	body = document.querySelector('body');
+	canvas = document.querySelector('#canvas');
+	ctx = canvas.getContext('2d');
 
-  //  canvas.onclick = onCanvasClick;
+	body.onmousemove = onMouseMove;
 
-  drawList.leftPaddle = new Paddle(canvas.width/10,canvas.height/2);
-  drawList.rightPaddle = new Paddle((canvas.width/10)*9,canvas.height/2);
+	//  canvas.onclick = onCanvasClick;
 
-  drawList.puck1 = new Puck(canvas.height/2);
+	drawList.leftPaddle = new Paddle(canvas.width/10,canvas.height/2);
+	drawList.rightPaddle = new Paddle((canvas.width/10)*9,canvas.height/2);
 
-  window.requestAnimationFrame(update);
+	drawList.puck1 = new Puck(canvas.height/2);
+
+	window.requestAnimationFrame(update);
 }
 window.onload = init;
 
 const joinButton = () =>{
-  if(document.querySelector("#usernameField").value.indexOf('<') > -1){
-    alert("Invalid Character!");
-    return;
-  }
+	if(document.querySelector("#usernameField").value.indexOf('<') > -1){
+		alert("Invalid Character!");
+		return;
+	}
 
-  if(document.querySelector("#usernameField").value) {
-    socket.emit('join', {
-      name: document.querySelector("#usernameField").value,
-    });
+	if(document.querySelector("#usernameField").value) {
+		socket.emit('join', {
+			name: document.querySelector("#usernameField").value,
+		});
 
-  } else {
-    alert("You must enter a username!");
-  }
+	} else {
+		alert("You must enter a username!");
+	}
 }
 
-const onMouseMove = (e) =>{
-  const newOffsetY = e.y - canvas.offsetTop;
+const joinRoomButton = () => {
+	//	if(document.querySelector("#usernameField").value.indexOf('<') > -1){
+	//    alert("Invalid Character!");
+	//    return;
+	//  }
+	//
+	//  if(document.querySelector("#usernameField").value) {
+	//    socket.emit('join', {
+	//      name: document.querySelector("#usernameField").value,
+	//    });
+	//
+	//  } else {
+	//    alert("You must enter a username!");
+	//  }
+}	
 
-  drawList.leftPaddle.y = newOffsetY;
+const hostRoomButton = () => {
+	if(document.querySelector("#hostField").value.indexOf('<') > -1){
+		alert("Invalid Character!");
+		return;
+	}
+
+	if(document.querySelector("#hostField").value) {
+		socket.emit('hostRoom', {
+			name: document.querySelector("#hostField").value,
+		});
+
+	} else {
+		alert("You must enter a room name!");
+	}
+
+}	
+
+const onMouseMove = (e) =>{
+	const newOffsetY = e.y - canvas.offsetTop;
+
+	drawList.leftPaddle.y = newOffsetY;
 }
 
 //const onCanvasClick = (e) =>{
@@ -83,99 +124,99 @@ const onMouseMove = (e) =>{
 //}
 
 const draw = () => {
-  ctx.save();
+	ctx.save();
 
-  drawMainLine();
+	drawMainLine();
 
-  drawScore();
+	drawScore();
 
-  const keys = Object.keys(drawList);
+	const keys = Object.keys(drawList);
 
 	console.log(keys.length);
-	
-  for(let i=0; i<keys.length; i++){
-    const toDraw = drawList[keys[i]];
 
-    toDraw.drawThis();
-  }
+	for(let i=0; i<keys.length; i++){
+		const toDraw = drawList[keys[i]];
 
-  ctx.restore();
+		toDraw.drawThis();
+	}
+
+	ctx.restore();
 }
 
 const drawMainLine = () =>{
-  ctx.save();
+	ctx.save();
 
-  ctx.setLineDash([10]);
+	ctx.setLineDash([10]);
 
-  ctx.strokeStyle = "white";
+	ctx.strokeStyle = "white";
 
-	ctx.beginpath();
-  ctx.moveTo(canvas.width/2,0);
-  ctx.lineTo(canvas.width/2, canvas.height);
-  ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(canvas.width/2,0);
+	ctx.lineTo(canvas.width/2, canvas.height);
+	ctx.stroke();
 
-  ctx.restore();
+	ctx.restore();
 }
 
 const drawScore = () =>{
-  ctx.save();
+	ctx.save();
 
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
 
-  //left
-  ctx.fillText(drawList.leftPaddle.score.toString(),canvas.width/2 - 25, 25);
+	//left
+	ctx.fillText(drawList.leftPaddle.score.toString(),canvas.width/2 - 25, 25);
 
-  //right
-  ctx.fillText(drawList.rightPaddle.score.toString(),canvas.width/2 + 25, 25);
+	//right
+	ctx.fillText(drawList.rightPaddle.score.toString(),canvas.width/2 + 25, 25);
 
-  ctx.restore();
+	ctx.restore();
 }
 
 const findScreen = () =>{
-  ctx.save();
+	ctx.save();
 
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Find a room to start",canvas.width/2,canvas.height/2);
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Find a room or host a room to start",canvas.width/2,canvas.height/2);
 
-  ctx.restore();
+	ctx.restore();
 }
 
 const waitScreen = () =>{
-  ctx.save();
+	ctx.save();
 
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("Waiting for game to start...",canvas.width/2,canvas.height/2);
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Waiting for game to start...",canvas.width/2,canvas.height/2);
 
-  ctx.restore();
+	ctx.restore();
 }
 
 const gameplay = () =>{
-  ctx.save();
+	ctx.save();
 
-  draw();
+	draw();
 
-  ctx.restore();
+	ctx.restore();
 }
 
 const update = () => {
 
-  ctx.fillStyle = "black";
-  ctx.fillRect(0,0,canvas.width, canvas.height);
+	ctx.fillStyle = "black";
+	ctx.fillRect(0,0,canvas.width, canvas.height);
 
-  if(currentScene === "find"){
-    findScreen();
-  } else if( currentScene === "gameplay"){
-    gameplay();
-  } else if( currentScene === "wait"){
-    waitScreen();
-  }
+	if(currentScene === "find"){
+		findScreen();
+	} else if( currentScene === "gameplay"){
+		gameplay();
+	} else if( currentScene === "wait"){
+		waitScreen();
+	}
 
 
-  requestAnimationFrame(update);
+	requestAnimationFrame(update);
 }

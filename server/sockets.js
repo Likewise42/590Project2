@@ -5,76 +5,102 @@ let io;
 
 const users = {};
 
-// commented for eslint PLEASE UNCOMMENT WHEN YOU START WORKIGN AGAIN
-// const rooms = {};
-// const newRoom = (sock, name) => {
-//  const socket = sock;
-//  console.log(`creating room ${name}`);
-//
-//  rooms[name] = {
-//    name,
-//    userNum: 0,
-//    host: '',
-//    client: '',
-//  };
-//
-//  socket.roomToJoin = rooms[name].title;
-// };
-//
-// const joinRoom = (sock, host) => {
-//  const socket = sock;
-//
-//  rooms[socket.roomToJoin].userNum++;
-//  if (host) {
-//    rooms[socket.roomToJoin].host = socket.name;
-//  } else {
-//    rooms[socket.roomToJoin].client = socket.name;
-//  }
-//
-//  console.log(`User ${socket.name} is joining room ${rooms[socket.roomToJoin].name}`);
-// };
+
+const rooms = {};
+const newRoom = (name) => {
+	console.log(`creating room ${name}`);
+
+	if(rooms[name]){
+		console.log('room already exists. this should never be called');
+	} else{
+		rooms[name] = {
+			name,
+			host: '',
+			client: '',
+		};
+		console.dir(rooms[name]);
+	}
+
+};
+
+const hostRoom = (sock) => {
+	const socket = sock;
+	//if someone else is already hosting the room
+	if(rooms[socket.roomToJoin]){
+		socket.emit('roomAlreadyHosted');
+		socket.roomToJoin = '';
+	}else{
+		console.log(`User ${socket.name} is hosting room ${socket.roomToJoin.name}`);
+
+		newRoom(socket.roomToJoin);
+		
+		rooms[socket.roomToJoin].host = socket.name;
+		socket.join(socket.roomToJoin);
+		socket.emit('roomHosted',socket.roomToJoin);
+	}
+}
+
+const joinRoom = (sock) => {
+	const socket = sock;
+
+	rooms[socket.roomToJoin].client = socket.name;
+	console.log(`User ${socket.name} is joining room ${rooms[socket.roomToJoin].name}`);
+
+};
+
+const roomSockets = (sock) =>{
+	const socket = sock;
+
+	socket.on('hostRoom', (data) =>{
+		socket.roomToJoin = data.name;
+		hostRoom(socket);
+	});
+}
 
 const setupSockets = (ioServer) => {
-  io = ioServer;
+	io = ioServer;
 
-  io.on('connection', (sock) => {
-    const socket = sock;
+	io.on('connection', (sock) => {
+		const socket = sock;
 
-    console.log('user connected');
+		console.log('user connected');
 
-    const hash = xxh.h32(`${socket.id}${new Date().getTime()}`, 0xCAFEBABE).toString(16);
+		const hash = xxh.h32(`${socket.id}${new Date().getTime()}`, 0xCAFEBABE).toString(16);
 
-    socket.hash = hash;
+		socket.hash = hash;
 
-    socket.on('join', (data) => {
-      socket.roomToJoin = {};
-      socket.name = data.name;
+		socket.on('join', (data) => {
+			socket.roomToJoin = {};
+			socket.name = data.name;
 
-      let nameValid = true;
+			roomSockets(socket);
 
-      const keys = Object.keys(users);
-      for (let i = 0; i < keys.length; i++) {
-        const user = users[keys[i]];
-        if (user === socket.name) {
-          nameValid = false;
-        }
-      }
+			let nameValid = true;
 
-      if (nameValid) {
-        users[socket.name] = socket.name;
+			const keys = Object.keys(users);
+			for (let i = 0; i < keys.length; i++) {
+				const user = users[keys[i]];
+				if (user === socket.name) {
+					nameValid = false;
+				}
+			}
 
-        socket.emit('nameValid');
+			if (nameValid) {
+				users[socket.name] = socket.name;
 
-        console.log(`User ${socket.name} joined the server!`);
-      } else {
-        socket.emit('nameInvalid');
-      }
-    });
+				socket.emit('nameValid');
 
-    socket.on('disconnect', () => {
-      delete (users[socket.name]);
-    });
-  });
+				console.log(`User ${socket.name} joined the server!`);
+			} else {
+				socket.emit('nameInvalid');
+			}
+		});
+
+		socket.on('disconnect', () => {
+			console.log(`User ${socket.name} left the server!`);
+			delete (users[socket.name]);
+		});
+	});
 };
 
 module.exports.setupSockets = setupSockets;
