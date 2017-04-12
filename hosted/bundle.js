@@ -50,147 +50,149 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Puck = function () {
-  function Puck(yPos) {
-    _classCallCheck(this, Puck);
+	function Puck(yPos) {
+		_classCallCheck(this, Puck);
 
-    this.x = canvas.width / 2;
-    this.y = yPos;
+		this.x = canvas.width / 2;
+		this.y = yPos;
 
-    this.spawnX = this.x;
-    this.spawnY = this.y;
+		this.spawnX = this.x;
+		this.spawnY = this.y;
 
-    this.velocityX = 1;
-    this.velocityY = 1;
+		this.velocityX = 1;
+		this.velocityY = 1;
 
-    this.velocityMult = 8;
-    this.velocityMultCap = 14;
+		this.velocityMult = 8;
+		this.velocityMultCap = 14;
 
-    this.width = canvas.width / 60;
-    this.height = this.width;
-  }
+		this.width = canvas.width / 60;
+		this.height = this.width;
+	}
 
-  //  increaseVelocityMult(){
-  //
-  //    if(!(this.velocityMult > this.velocityMultCap)){
-  //      this.velocityMult += .3;
-  //    }
-  //  }
+	//  increaseVelocityMult(){
+	//
+	//    if(!(this.velocityMult > this.velocityMultCap)){
+	//      this.velocityMult += .3;
+	//    }
+	//  }
 
-  _createClass(Puck, [{
-    key: "respawn",
-    value: function respawn(spawnSide) {
-      this.x = this.spawnX;
+	_createClass(Puck, [{
+		key: "respawn",
+		value: function respawn(spawnSide) {
+			this.x = this.spawnX;
 
-      var newY = Math.random() * canvas.height;
-      this.y = newY;
+			var newY = Math.random() * canvas.height;
+			this.y = newY;
 
-      this.velocityX = spawnSide;
+			this.velocityX = spawnSide;
 
-      var newVelY = 1;
-      if (Math.random() > .5) {
-        newVelY = -1;
-      }
+			var newVelY = 1;
+			if (Math.random() > .5) {
+				newVelY = -1;
+			}
 
-      this.velocityY = newVelY;
+			this.velocityY = newVelY;
 
-      this.velocityMult = 6;
-    }
-  }, {
-    key: "drawThis",
-    value: function drawThis() {
+			this.velocityMult = 6;
+		}
+	}, {
+		key: "drawThis",
+		value: function drawThis() {
 
-      //movement
-      this.checkCollisions();
+			//movement
+			if (host) {
+				this.checkCollisions();
 
-      this.x += this.velocityX * this.velocityMult;
-      this.y += this.velocityY * this.velocityMult;
+				this.x += this.velocityX * this.velocityMult;
+				this.y += this.velocityY * this.velocityMult;
+			}
 
-      //drawing
-      ctx.save();
+			//drawing
+			ctx.save();
 
-      ctx.fillStyle = "white";
+			ctx.fillStyle = "white";
 
-      var drawX = this.x - this.width / 2;
-      var drawY = this.y - this.height / 2;
+			var drawX = this.x - this.width / 2;
+			var drawY = this.y - this.height / 2;
 
-      ctx.fillRect(drawX, drawY, this.width, this.height);
+			ctx.fillRect(drawX, drawY, this.width, this.height);
 
-      ctx.restore();
-    }
-  }, {
-    key: "checkCollisions",
-    value: function checkCollisions() {
-      //check X
-      if (this.x <= 5) {
-        //      this.x = 5;
-        //      this.flipX();
-        drawList.rightPaddle.score++;
-        this.respawn(1);
-      } else if (this.x >= canvas.width - 5) {
-        //      this.x = (canvas.width-5);
-        //      this.flipX();
-        drawList.leftPaddle.score++;
-        this.respawn(-1);
-      }
+			ctx.restore();
+		}
+	}, {
+		key: "checkCollisions",
+		value: function checkCollisions() {
+			//check X
+			if (this.x <= 5) {
+				//      this.x = 5;
+				//      this.flipX();
+				drawList.rightPaddle.score++;
+				this.respawn(1);
+			} else if (this.x >= canvas.width - 5) {
+				//      this.x = (canvas.width-5);
+				//      this.flipX();
+				drawList.leftPaddle.score++;
+				this.respawn(-1);
+			}
 
-      //check Y
-      if (this.y <= 5) {
-        this.y = 5;
-        this.flipY();
-      } else if (this.y >= canvas.height - 5) {
-        this.y = canvas.height - 5;
-        this.flipY();
-      }
+			//check Y
+			if (this.y <= 5) {
+				this.y = 5;
+				this.flipY();
+			} else if (this.y >= canvas.height - 5) {
+				this.y = canvas.height - 5;
+				this.flipY();
+			}
 
-      //check Paddles
-      this.checkPaddles();
-    }
-  }, {
-    key: "checkPaddles",
-    value: function checkPaddles() {
-      //left paddle
-      var lPaddle = drawList.leftPaddle;
+			//check Paddles
+			this.checkPaddles();
+		}
+	}, {
+		key: "checkPaddles",
+		value: function checkPaddles() {
+			//left paddle
+			var lPaddle = drawList.leftPaddle;
 
-      var lPaddleXBool = this.x - this.width / 2 <= lPaddle.x + lPaddle.width / 2 && this.x + this.width / 2 >= lPaddle.x - lPaddle.width / 2;
-      var lPaddleYBool = this.y - this.height / 2 <= lPaddle.y + lPaddle.height / 2 && this.y + this.height / 2 >= lPaddle.y - lPaddle.height / 2;
-      if (lPaddleXBool && lPaddleYBool) {
-        this.flipX();
+			var lPaddleXBool = this.x - this.width / 2 <= lPaddle.x + lPaddle.width / 2 && this.x + this.width / 2 >= lPaddle.x - lPaddle.width / 2;
+			var lPaddleYBool = this.y - this.height / 2 <= lPaddle.y + lPaddle.height / 2 && this.y + this.height / 2 >= lPaddle.y - lPaddle.height / 2;
+			if (lPaddleXBool && lPaddleYBool) {
+				this.flipX();
 
-        var newY = (this.y - lPaddle.y) / lPaddle.height * 3;
+				var newY = (this.y - lPaddle.y) / lPaddle.height * 3;
 
-        this.velocityY = newY;
-      }
+				this.velocityY = newY;
+			}
 
-      //lright paddle
-      var rPaddle = drawList.rightPaddle;
+			//lright paddle
+			var rPaddle = drawList.rightPaddle;
 
-      var rPaddleXBool = this.x + this.width / 2 >= rPaddle.x - rPaddle.width / 2 && this.x - this.width / 2 <= rPaddle.x + rPaddle.width / 2;
-      var rPaddleYBool = this.y - this.height / 2 <= rPaddle.y + rPaddle.height / 2 && this.y + this.height / 2 >= rPaddle.y - rPaddle.height / 2;
-      if (rPaddleXBool && rPaddleYBool) {
-        this.flipX();
+			var rPaddleXBool = this.x + this.width / 2 >= rPaddle.x - rPaddle.width / 2 && this.x - this.width / 2 <= rPaddle.x + rPaddle.width / 2;
+			var rPaddleYBool = this.y - this.height / 2 <= rPaddle.y + rPaddle.height / 2 && this.y + this.height / 2 >= rPaddle.y - rPaddle.height / 2;
+			if (rPaddleXBool && rPaddleYBool) {
+				this.flipX();
 
-        var _newY = (this.y - rPaddle.y) / rPaddle.height * 3;
+				var _newY = (this.y - rPaddle.y) / rPaddle.height * 3;
 
-        this.velocityY = _newY;
-      }
-    }
-  }, {
-    key: "flipY",
-    value: function flipY() {
-      this.velocityY *= -1;
+				this.velocityY = _newY;
+			}
+		}
+	}, {
+		key: "flipY",
+		value: function flipY() {
+			this.velocityY *= -1;
 
-      //    this.increaseVelocityMult();
-    }
-  }, {
-    key: "flipX",
-    value: function flipX() {
-      this.velocityX *= -1;
+			//    this.increaseVelocityMult();
+		}
+	}, {
+		key: "flipX",
+		value: function flipX() {
+			this.velocityX *= -1;
 
-      //    this.increaseVelocityMult();
-    }
-  }]);
+			//    this.increaseVelocityMult();
+		}
+	}]);
 
-  return Puck;
+	return Puck;
 }();
 'use strict';
 
@@ -201,6 +203,8 @@ var socket = void 0;
 var hash = void 0;
 var currentScene = "find";
 var drawList = {};
+var host = {};
+var mouseLocs = {};
 
 var init = function init() {
 	//socket stuff
@@ -227,6 +231,57 @@ var init = function init() {
 			console.log(data);
 			document.querySelector("#joinHostRow").style.display = "none";
 			document.querySelector("#playerVSRow").style.visibility = "visible";
+			document.querySelector("#roomNameEle").innerHTML = data.roomName;
+			document.querySelector("#p1Ele").innerHTML = data.hostName;
+
+			currentScene = "wait";
+			host = true;
+		});
+
+		socket.on('roomJoined', function (data) {
+			console.log(data);
+			document.querySelector("#joinHostRow").style.display = "none";
+			document.querySelector("#playerVSRow").style.visibility = "visible";
+			document.querySelector("#roomNameEle").innerHTML = data.roomName;
+			document.querySelector("#p1Ele").innerHTML = data.hostName;
+			document.querySelector("#p2Ele").innerHTML = data.clientName;
+
+			currentScene = "readyClient";
+			host = false;
+		});
+
+		socket.on('clientJoined', function (data) {
+			document.querySelector("#p2Ele").innerHTML = data;
+
+			currentScene = "readyHost";
+		});
+
+		socket.on('gameStart', function () {
+			currentScene = "gameplay";
+		});
+
+		socket.on('clientUpdate', function (data) {
+			drawList.rightPaddle.y = data.y;
+		});
+
+		socket.on('hostUpdate', function (data) {
+
+			//left paddle
+			drawList.leftPaddle.x = data.leftPaddle.x;
+			drawList.leftPaddle.y = data.leftPaddle.y;
+			drawList.leftPaddle.score = data.leftPaddle.score;
+
+			//right paddle
+			drawList.rightPaddle.x = data.rightPaddle.x;
+			drawList.rightPaddle.y = data.rightPaddle.y;
+			drawList.rightPaddle.score = data.rightPaddle.score;
+
+			//puck1
+			drawList.puck1.x = data.puck1.x;
+			drawList.puck1.y = data.puck1.y;
+			drawList.puck1.velocityX = data.puck1.velocityX;
+			drawList.puck1.velocityY = data.puck1.velocityY;
+			drawList.puck1.velocityMult = data.puck1.velocityMult;
 		});
 	});
 
@@ -236,7 +291,7 @@ var init = function init() {
 
 	body.onmousemove = onMouseMove;
 
-	//  canvas.onclick = onCanvasClick;
+	canvas.onclick = onCanvasClick;
 
 	drawList.leftPaddle = new Paddle(canvas.width / 10, canvas.height / 2);
 	drawList.rightPaddle = new Paddle(canvas.width / 10 * 9, canvas.height / 2);
@@ -263,19 +318,18 @@ var joinButton = function joinButton() {
 };
 
 var joinRoomButton = function joinRoomButton() {
-	//	if(document.querySelector("#usernameField").value.indexOf('<') > -1){
-	//    alert("Invalid Character!");
-	//    return;
-	//  }
-	//
-	//  if(document.querySelector("#usernameField").value) {
-	//    socket.emit('join', {
-	//      name: document.querySelector("#usernameField").value,
-	//    });
-	//
-	//  } else {
-	//    alert("You must enter a username!");
-	//  }
+	if (document.querySelector("#joinField").value.indexOf('<') > -1) {
+		alert("Invalid Character!");
+		return;
+	}
+
+	if (document.querySelector("#joinField").value) {
+		socket.emit('joinRoom', {
+			name: document.querySelector("#joinField").value
+		});
+	} else {
+		alert("You must enter a username!");
+	}
 };
 
 var hostRoomButton = function hostRoomButton() {
@@ -294,28 +348,76 @@ var hostRoomButton = function hostRoomButton() {
 };
 
 var onMouseMove = function onMouseMove(e) {
-	var newOffsetY = e.y - canvas.offsetTop;
 
-	drawList.leftPaddle.y = newOffsetY;
+	if (host === false) {
+		socket.emit('clientUpdate', {
+			y: e.y - canvas.offsetTop
+		});
+	} else if (host === true && currentScene === "gameplay") {
+		var newOffsetY = e.y - canvas.offsetTop;
+		drawList.leftPaddle.y = newOffsetY;
+	}
 };
 
-//const onCanvasClick = (e) =>{
-//  ctx.save();
-//  //console.dir(e);
-//
-//  //use offsetX and offsetY
-//  //  ctx.fillStyle = "red";
-//  //  ctx.fillRect(e.offsetX,e.offsetY,20,20);
-//
-//
-//  if (currentScene === "title"){
-//    currentScene = "gameplay";
-//  }
-//
-//  ctx.restore();
-//}
+var onCanvasClick = function onCanvasClick(e) {
+	ctx.save();
+	//console.dir(e);
 
-var draw = function draw() {
+	//use offsetX and offsetY
+	//  ctx.fillStyle = "red";
+	//  ctx.fillRect(e.offsetX,e.offsetY,20,20);
+
+
+	if (currentScene === "readyHost") {
+		currentScene = "gameplay";
+
+		socket.emit('gameStartHost');
+	}
+
+	ctx.restore();
+};
+
+var drawHost = function drawHost() {
+	ctx.save();
+
+	drawMainLine();
+
+	drawScore();
+
+	var keys = Object.keys(drawList);
+
+	for (var i = 0; i < keys.length; i++) {
+		var toDraw = drawList[keys[i]];
+
+		toDraw.drawThis();
+	}
+
+	ctx.restore();
+
+	socket.emit('hostUpdate', {
+		leftPaddle: {
+			x: drawList.leftPaddle.x,
+			y: drawList.leftPaddle.y,
+			score: drawList.leftPaddle.score
+		},
+		rightPaddle: {
+			x: drawList.rightPaddle.x,
+			y: drawList.rightPaddle.y,
+			score: drawList.rightPaddle.score
+		},
+		puck1: {
+			x: drawList.puck1.x,
+			y: drawList.puck1.y,
+
+			velocityX: drawList.puck1.velocityX,
+			velocityY: drawList.puck1.velocityY,
+
+			velocityMult: drawList.puck1.velocityMult
+		}
+	});
+};
+
+var drawClient = function drawClient() {
 	ctx.save();
 
 	drawMainLine();
@@ -383,7 +485,29 @@ var waitScreen = function waitScreen() {
 	ctx.fillStyle = "white";
 	ctx.font = "30px Arial";
 	ctx.textAlign = "center";
-	ctx.fillText("Waiting for game to start...", canvas.width / 2, canvas.height / 2);
+	ctx.fillText("Waiting for another player...", canvas.width / 2, canvas.height / 2);
+
+	ctx.restore();
+};
+
+var readyHostScreen = function readyHostScreen() {
+	ctx.save();
+
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Click this to start", canvas.width / 2, canvas.height / 2);
+
+	ctx.restore();
+};
+
+var readyClientScreen = function readyClientScreen() {
+	ctx.save();
+
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Waiting for the host to start the game", canvas.width / 2, canvas.height / 2);
 
 	ctx.restore();
 };
@@ -391,7 +515,13 @@ var waitScreen = function waitScreen() {
 var gameplay = function gameplay() {
 	ctx.save();
 
-	draw();
+	if (host === true) {
+		drawHost();
+	} else if (host === false) {
+		drawClient();
+	} else {
+		console.log("ryan hecked up");
+	}
 
 	ctx.restore();
 };
@@ -407,6 +537,10 @@ var update = function update() {
 		gameplay();
 	} else if (currentScene === "wait") {
 		waitScreen();
+	} else if (currentScene === "readyHost") {
+		readyHostScreen();
+	} else if (currentScene === "readyClient") {
+		readyClientScreen();
 	}
 
 	requestAnimationFrame(update);

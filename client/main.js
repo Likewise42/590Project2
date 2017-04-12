@@ -5,6 +5,8 @@ let socket;
 let hash;
 let currentScene = "find";
 let drawList = {};
+let host = {};
+let mouseLocs = {};
 
 
 const init = () => {
@@ -32,6 +34,57 @@ const init = () => {
 			console.log(data);
 			document.querySelector("#joinHostRow").style.display = "none";
 			document.querySelector("#playerVSRow").style.visibility = "visible";
+			document.querySelector("#roomNameEle").innerHTML = data.roomName;
+			document.querySelector("#p1Ele").innerHTML = data.hostName;
+
+			currentScene = "wait";
+			host = true;
+		});
+
+		socket.on('roomJoined',(data)=>{
+			console.log(data);
+			document.querySelector("#joinHostRow").style.display = "none";
+			document.querySelector("#playerVSRow").style.visibility = "visible";
+			document.querySelector("#roomNameEle").innerHTML = data.roomName;
+			document.querySelector("#p1Ele").innerHTML = data.hostName;
+			document.querySelector("#p2Ele").innerHTML = data.clientName;
+
+			currentScene = "readyClient";
+			host = false;
+		});
+
+		socket.on('clientJoined',(data)=>{
+			document.querySelector("#p2Ele").innerHTML = data;
+
+			currentScene = "readyHost";
+		});
+
+		socket.on('gameStart', ()=>{
+			currentScene = "gameplay";
+		});
+
+		socket.on('clientUpdate', (data)=>{
+			drawList.rightPaddle.y = data.y;
+		});
+
+		socket.on('hostUpdate', (data)=>{
+
+			//left paddle
+			drawList.leftPaddle.x = data.leftPaddle.x;
+			drawList.leftPaddle.y = data.leftPaddle.y;
+			drawList.leftPaddle.score = data.leftPaddle.score;
+
+			//right paddle
+			drawList.rightPaddle.x = data.rightPaddle.x;
+			drawList.rightPaddle.y = data.rightPaddle.y;
+			drawList.rightPaddle.score = data.rightPaddle.score;
+
+			//puck1
+			drawList.puck1.x = data.puck1.x;
+			drawList.puck1.y = data.puck1.y;
+			drawList.puck1.velocityX = data.puck1.velocityX;
+			drawList.puck1.velocityY = data.puck1.velocityY;
+			drawList.puck1.velocityMult = data.puck1.velocityMult;
 		});
 	});
 
@@ -41,7 +94,7 @@ const init = () => {
 
 	body.onmousemove = onMouseMove;
 
-	//  canvas.onclick = onCanvasClick;
+	canvas.onclick = onCanvasClick;
 
 	drawList.leftPaddle = new Paddle(canvas.width/10,canvas.height/2);
 	drawList.rightPaddle = new Paddle((canvas.width/10)*9,canvas.height/2);
@@ -49,7 +102,7 @@ const init = () => {
 	drawList.puck1 = new Puck(canvas.height/2);
 
 	window.requestAnimationFrame(update);
-}
+};
 window.onload = init;
 
 const joinButton = () =>{
@@ -69,19 +122,19 @@ const joinButton = () =>{
 }
 
 const joinRoomButton = () => {
-	//	if(document.querySelector("#usernameField").value.indexOf('<') > -1){
-	//    alert("Invalid Character!");
-	//    return;
-	//  }
-	//
-	//  if(document.querySelector("#usernameField").value) {
-	//    socket.emit('join', {
-	//      name: document.querySelector("#usernameField").value,
-	//    });
-	//
-	//  } else {
-	//    alert("You must enter a username!");
-	//  }
+	if(document.querySelector("#joinField").value.indexOf('<') > -1){
+		alert("Invalid Character!");
+		return;
+	}
+
+	if(document.querySelector("#joinField").value) {
+		socket.emit('joinRoom', {
+			name: document.querySelector("#joinField").value,
+		});
+
+	} else {
+		alert("You must enter a username!");
+	}
 }	
 
 const hostRoomButton = () => {
@@ -102,28 +155,76 @@ const hostRoomButton = () => {
 }	
 
 const onMouseMove = (e) =>{
-	const newOffsetY = e.y - canvas.offsetTop;
 
-	drawList.leftPaddle.y = newOffsetY;
+	if(host === false){
+		socket.emit('clientUpdate', {
+			y: e.y - canvas.offsetTop,
+		});
+	} else if(host === true && currentScene === "gameplay"){
+		const newOffsetY = e.y - canvas.offsetTop;
+		drawList.leftPaddle.y = newOffsetY;
+	}
 }
 
-//const onCanvasClick = (e) =>{
-//  ctx.save();
-//  //console.dir(e);
-//
-//  //use offsetX and offsetY
-//  //  ctx.fillStyle = "red";
-//  //  ctx.fillRect(e.offsetX,e.offsetY,20,20);
-//
-//
-//  if (currentScene === "title"){
-//    currentScene = "gameplay";
-//  }
-//
-//  ctx.restore();
-//}
+const onCanvasClick = (e) =>{
+	ctx.save();
+	//console.dir(e);
 
-const draw = () => {
+	//use offsetX and offsetY
+	//  ctx.fillStyle = "red";
+	//  ctx.fillRect(e.offsetX,e.offsetY,20,20);
+
+
+	if (currentScene === "readyHost"){
+		currentScene = "gameplay";
+
+		socket.emit('gameStartHost');
+	}
+
+	ctx.restore();
+}
+
+const drawHost = () => {
+	ctx.save();
+
+	drawMainLine();
+
+	drawScore();
+
+	const keys = Object.keys(drawList);
+
+	for(let i=0; i<keys.length; i++){
+		const toDraw = drawList[keys[i]];
+
+		toDraw.drawThis();
+	}
+
+	ctx.restore();
+
+	socket.emit('hostUpdate', {
+		leftPaddle: {
+			x: drawList.leftPaddle.x,
+			y: drawList.leftPaddle.y,
+			score: drawList.leftPaddle.score,
+		},
+		rightPaddle: {
+			x: drawList.rightPaddle.x,
+			y: drawList.rightPaddle.y,
+			score: drawList.rightPaddle.score,
+		},
+		puck1: {
+			x: drawList.puck1.x,
+			y: drawList.puck1.y,
+
+			velocityX: drawList.puck1.velocityX,
+			velocityY: drawList.puck1.velocityY,
+
+			velocityMult: drawList.puck1.velocityMult,
+		},
+	});
+}
+
+const drawClient = () =>{
 	ctx.save();
 
 	drawMainLine();
@@ -191,7 +292,29 @@ const waitScreen = () =>{
 	ctx.fillStyle = "white";
 	ctx.font = "30px Arial";
 	ctx.textAlign = "center";
-	ctx.fillText("Waiting for game to start...",canvas.width/2,canvas.height/2);
+	ctx.fillText("Waiting for another player...",canvas.width/2,canvas.height/2);
+
+	ctx.restore();
+}
+
+const readyHostScreen = () =>{
+	ctx.save();
+
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Click this to start",canvas.width/2,canvas.height/2);
+
+	ctx.restore();
+}
+
+const readyClientScreen = () =>{
+	ctx.save();
+
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.textAlign = "center";
+	ctx.fillText("Waiting for the host to start the game",canvas.width/2,canvas.height/2);
 
 	ctx.restore();
 }
@@ -199,7 +322,13 @@ const waitScreen = () =>{
 const gameplay = () =>{
 	ctx.save();
 
-	draw();
+	if(host === true){
+		drawHost();	
+	} else if(host === false){
+		drawClient();
+	} else {
+		console.log("ryan hecked up");
+	}
 
 	ctx.restore();
 }
@@ -215,8 +344,11 @@ const update = () => {
 		gameplay();
 	} else if( currentScene === "wait"){
 		waitScreen();
+	} else if( currentScene === "readyHost"){
+		readyHostScreen();
+	} else if( currentScene === "readyClient"){
+		readyClientScreen();
 	}
-
 
 	requestAnimationFrame(update);
 }

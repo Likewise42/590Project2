@@ -30,21 +30,38 @@ const hostRoom = (sock) => {
 		socket.emit('roomAlreadyHosted');
 		socket.roomToJoin = '';
 	}else{
-		console.log(`User ${socket.name} is hosting room ${socket.roomToJoin.name}`);
+		console.log(`User ${socket.name} is hosting room ${socket.roomToJoin}`);
 
 		newRoom(socket.roomToJoin);
-		
+
 		rooms[socket.roomToJoin].host = socket.name;
 		socket.join(socket.roomToJoin);
-		socket.emit('roomHosted',socket.roomToJoin);
+		socket.emit('roomHosted',{
+			roomName: socket.roomToJoin,
+			hostName: socket.name,
+		});
 	}
 }
 
 const joinRoom = (sock) => {
 	const socket = sock;
 
-	rooms[socket.roomToJoin].client = socket.name;
-	console.log(`User ${socket.name} is joining room ${rooms[socket.roomToJoin].name}`);
+	if(rooms[socket.roomToJoin]){
+		console.log(`User ${socket.name} is joining room ${socket.roomToJoin.name}`);
+
+		rooms[socket.roomToJoin].client = socket.name;
+		socket.join(socket.roomToJoin);
+		socket.emit('roomJoined',{
+			roomName: socket.roomToJoin,
+			hostName: rooms[socket.roomToJoin].host,
+			clientName: socket.name,
+		});
+		
+		socket.broadcast.to(socket.roomToJoin).emit('clientJoined',socket.name);
+	} else {
+		socket.emit('roomNaN');
+		socket.roomToJoin = '';
+	}
 
 };
 
@@ -54,6 +71,23 @@ const roomSockets = (sock) =>{
 	socket.on('hostRoom', (data) =>{
 		socket.roomToJoin = data.name;
 		hostRoom(socket);
+	});
+
+	socket.on('joinRoom', (data) =>{
+		socket.roomToJoin = data.name;
+		joinRoom(socket);
+	});
+	
+	socket.on('gameStartHost', () => {
+		socket.broadcast.to(socket.roomToJoin).emit('gameStart');
+	});
+	
+	socket.on('clientUpdate', (data) =>{
+		socket.broadcast.to(socket.roomToJoin).emit('clientUpdate',data);
+	});
+	
+	socket.on('hostUpdate', (data) =>{
+		socket.broadcast.to(socket.roomToJoin).emit('hostUpdate',data);
 	});
 }
 
