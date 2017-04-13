@@ -127,6 +127,8 @@ var leaveRoom = function leaveRoom() {
   socket.emit('leaveRoom');
 
   //reset values to beginning
+  document.querySelector("#p2Ele").innerHTML = '...';
+
   //left paddle
   drawList.leftPaddle.score = 0;
 
@@ -177,7 +179,7 @@ var joinRoomButton = function joinRoomButton() {
       name: document.querySelector("#joinField").value
     });
   } else {
-    alert("You must enter a username!");
+    alert("You must enter a roomname!");
   }
 };
 
