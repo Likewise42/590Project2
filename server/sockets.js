@@ -44,7 +44,7 @@ const joinRoom = (sock) => {
   console.log('joinROom hit');
   const socket = sock;
 
-  if (rooms[socket.roomToJoin]) {
+  if (rooms[socket.roomToJoin] && !rooms[socket.roomToJoin].client==='') {
     console.log(`User ${socket.name} is joining room ${socket.roomToJoin}`);
 
     rooms[socket.roomToJoin].client = socket.name;
