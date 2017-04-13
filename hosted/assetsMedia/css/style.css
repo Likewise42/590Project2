@@ -26,6 +26,10 @@ canvas {
   display: none;
 }
 
+#leaveRow{
+  display: none;
+}
+
 #nameAlert{
   display: none;
   margin-top: 10px;

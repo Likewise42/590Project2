@@ -18,7 +18,6 @@ const newRoom = (name) => {
       host: '',
       client: '',
     };
-    console.dir(rooms[name]);
   }
 };
 
@@ -42,10 +41,11 @@ const hostRoom = (sock) => {
 };
 
 const joinRoom = (sock) => {
+  console.log('joinROom hit');
   const socket = sock;
 
   if (rooms[socket.roomToJoin]) {
-    console.log(`User ${socket.name} is joining room ${socket.roomToJoin.name}`);
+    console.log(`User ${socket.name} is joining room ${socket.roomToJoin}`);
 
     rooms[socket.roomToJoin].client = socket.name;
     socket.join(socket.roomToJoin);
@@ -85,6 +85,13 @@ const roomSockets = (sock) => {
 
   socket.on('hostUpdate', (data) => {
     socket.broadcast.to(socket.roomToJoin).emit('hostUpdate', data);
+  });
+
+  socket.on('leaveRoom', () => {
+    socket.broadcast.to(socket.roomToJoin).emit('opponentLeft');
+    socket.leave(socket.roomToJoin);
+    delete (rooms[socket.roomToJoin]);
+    socket.roomToJoin = '';
   });
 };
 
@@ -129,6 +136,9 @@ const setupSockets = (ioServer) => {
 
     socket.on('disconnect', () => {
       console.log(`User ${socket.name} left the server!`);
+      socket.broadcast.to(socket.roomToJoin).emit('opponentLeft');
+      socket.leave(socket.roomToJoin);
+      delete (rooms[socket.roomToJoin]);
       delete (users[socket.name]);
     });
   });
