@@ -200,10 +200,10 @@ var onMouseMove = function onMouseMove(e) {
 
   if (host === false) {
     socket.emit('clientUpdate', {
-      y: e.y - canvas.offsetTop
+      y: e.clientY - canvas.offsetTop
     });
   } else if (host === true && currentScene === "gameplay") {
-    var newOffsetY = e.y - canvas.offsetTop;
+    var newOffsetY = e.clientY - canvas.offsetTop;
     drawList.leftPaddle.y = newOffsetY;
   }
 };

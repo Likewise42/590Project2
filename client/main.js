@@ -205,10 +205,10 @@ const onMouseMove = (e) =>{
 
   if(host === false){
     socket.emit('clientUpdate', {
-      y: e.y - canvas.offsetTop,
+      y: e.clientY - canvas.offsetTop,
     });
   } else if(host === true && currentScene === "gameplay"){
-    const newOffsetY = e.y - canvas.offsetTop;
+    const newOffsetY = e.clientY - canvas.offsetTop;
     drawList.leftPaddle.y = newOffsetY;
   }
 }
