@@ -24,6 +24,7 @@ var init = function init() {
   codyImg.src = './assets/assetsMedia/img/codyHouse.png';
 
   codyAudio = new Audio('./assets/assetsMedia/audio/cory.mp3');
+  codyAudio.loop = true;
   pongAudio = new Audio('./assets/assetsMedia/audio/pong.wav');
   pongScoreAudio = new Audio('./assets/assetsMedia/audio/pongScore.wav');
 
