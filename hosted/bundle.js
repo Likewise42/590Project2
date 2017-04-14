@@ -10,10 +10,22 @@ var drawList = {};
 var host = {};
 var mouseLocs = {};
 var inRoom = false;
+var codyImg = void 0;
+var codyAudio = void 0;
+var pongAudio = void 0;
+var pongScoreAudio = void 0;
+var name = void 0;
 
 var init = function init() {
   //socket stuff
   socket = io.connect();
+
+  codyImg = new Image();
+  codyImg.src = './assets/assetsMedia/img/codyHouse.png';
+
+  codyAudio = new Audio('./assets/assetsMedia/audio/song.mp3');
+  pongAudio = new Audio('./assets/assetsMedia/audio/pong.wav');
+  pongScoreAudio = new Audio('./assets/assetsMedia/audio/pongScore.wav');
 
   socket.on('connect', function () {
     console.log('connected to the server');
@@ -158,8 +170,12 @@ var joinButton = function joinButton() {
   }
 
   if (document.querySelector("#usernameField").value) {
+    name = document.querySelector("#usernameField").value;
+    if (name === 'Cody' || name === 'cody') {
+      codyAudio.play();
+    }
     socket.emit('join', {
-      name: document.querySelector("#usernameField").value
+      name: name
     });
   } else {
     alert("You must enter a username!");
@@ -382,6 +398,10 @@ var update = function update() {
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  if (name === 'Cody' || name === 'cody') {
+    ctx.drawImage(codyImg, 0, 0, canvas.width, canvas.height);
+  }
+
   if (currentScene === "find") {
     findScreen();
   } else if (currentScene === "gameplay") {
@@ -446,147 +466,150 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Puck = function () {
-	function Puck(yPos) {
-		_classCallCheck(this, Puck);
+  function Puck(yPos) {
+    _classCallCheck(this, Puck);
 
-		this.x = canvas.width / 2;
-		this.y = yPos;
+    this.x = canvas.width / 2;
+    this.y = yPos;
 
-		this.spawnX = this.x;
-		this.spawnY = this.y;
+    this.spawnX = this.x;
+    this.spawnY = this.y;
 
-		this.velocityX = 1;
-		this.velocityY = 1;
+    this.velocityX = 1;
+    this.velocityY = 1;
 
-		this.velocityMult = 8;
-		this.velocityMultCap = 14;
+    this.velocityMult = 8;
+    this.velocityMultCap = 14;
 
-		this.width = canvas.width / 60;
-		this.height = this.width;
-	}
+    this.width = canvas.width / 60;
+    this.height = this.width;
+  }
 
-	//  increaseVelocityMult(){
-	//
-	//    if(!(this.velocityMult > this.velocityMultCap)){
-	//      this.velocityMult += .3;
-	//    }
-	//  }
+  //  increaseVelocityMult(){
+  //
+  //    if(!(this.velocityMult > this.velocityMultCap)){
+  //      this.velocityMult += .3;
+  //    }
+  //  }
 
-	_createClass(Puck, [{
-		key: "respawn",
-		value: function respawn(spawnSide) {
-			this.x = this.spawnX;
+  _createClass(Puck, [{
+    key: "respawn",
+    value: function respawn(spawnSide) {
+      this.x = this.spawnX;
 
-			var newY = Math.random() * canvas.height;
-			this.y = newY;
+      var newY = Math.random() * canvas.height;
+      this.y = newY;
 
-			this.velocityX = spawnSide;
+      this.velocityX = spawnSide;
 
-			var newVelY = 1;
-			if (Math.random() > .5) {
-				newVelY = -1;
-			}
+      var newVelY = 1;
+      if (Math.random() > .5) {
+        newVelY = -1;
+      }
 
-			this.velocityY = newVelY;
+      this.velocityY = newVelY;
 
-			this.velocityMult = 6;
-		}
-	}, {
-		key: "drawThis",
-		value: function drawThis() {
+      this.velocityMult = 6;
+    }
+  }, {
+    key: "drawThis",
+    value: function drawThis() {
 
-			//movement
-			if (host) {
-				this.checkCollisions();
+      //movement
+      if (host) {
+        this.checkCollisions();
 
-				this.x += this.velocityX * this.velocityMult;
-				this.y += this.velocityY * this.velocityMult;
-			}
+        this.x += this.velocityX * this.velocityMult;
+        this.y += this.velocityY * this.velocityMult;
+      }
 
-			//drawing
-			ctx.save();
+      //drawing
+      ctx.save();
 
-			ctx.fillStyle = "white";
+      ctx.fillStyle = "white";
 
-			var drawX = this.x - this.width / 2;
-			var drawY = this.y - this.height / 2;
+      var drawX = this.x - this.width / 2;
+      var drawY = this.y - this.height / 2;
 
-			ctx.fillRect(drawX, drawY, this.width, this.height);
+      ctx.fillRect(drawX, drawY, this.width, this.height);
 
-			ctx.restore();
-		}
-	}, {
-		key: "checkCollisions",
-		value: function checkCollisions() {
-			//check X
-			if (this.x <= 5) {
-				//      this.x = 5;
-				//      this.flipX();
-				drawList.rightPaddle.score++;
-				this.respawn(1);
-			} else if (this.x >= canvas.width - 5) {
-				//      this.x = (canvas.width-5);
-				//      this.flipX();
-				drawList.leftPaddle.score++;
-				this.respawn(-1);
-			}
+      ctx.restore();
+    }
+  }, {
+    key: "checkCollisions",
+    value: function checkCollisions() {
+      //check X
+      if (this.x <= 5) {
+        //      this.x = 5;
+        //      this.flipX();
+        drawList.rightPaddle.score++;
+        this.respawn(1);
+        pongScoreAudio.play();
+      } else if (this.x >= canvas.width - 5) {
+        //      this.x = (canvas.width-5);
+        //      this.flipX();
+        drawList.leftPaddle.score++;
+        this.respawn(-1);
+        pongScoreAudio.play();
+      }
 
-			//check Y
-			if (this.y <= 5) {
-				this.y = 5;
-				this.flipY();
-			} else if (this.y >= canvas.height - 5) {
-				this.y = canvas.height - 5;
-				this.flipY();
-			}
+      //check Y
+      if (this.y <= 5) {
+        this.y = 5;
+        this.flipY();
+      } else if (this.y >= canvas.height - 5) {
+        this.y = canvas.height - 5;
+        this.flipY();
+      }
 
-			//check Paddles
-			this.checkPaddles();
-		}
-	}, {
-		key: "checkPaddles",
-		value: function checkPaddles() {
-			//left paddle
-			var lPaddle = drawList.leftPaddle;
+      //check Paddles
+      this.checkPaddles();
+    }
+  }, {
+    key: "checkPaddles",
+    value: function checkPaddles() {
+      //left paddle
+      var lPaddle = drawList.leftPaddle;
 
-			var lPaddleXBool = this.x - this.width / 2 <= lPaddle.x + lPaddle.width / 2 && this.x + this.width / 2 >= lPaddle.x - lPaddle.width / 2;
-			var lPaddleYBool = this.y - this.height / 2 <= lPaddle.y + lPaddle.height / 2 && this.y + this.height / 2 >= lPaddle.y - lPaddle.height / 2;
-			if (lPaddleXBool && lPaddleYBool) {
-				this.flipX();
+      var lPaddleXBool = this.x - this.width / 2 <= lPaddle.x + lPaddle.width / 2 && this.x + this.width / 2 >= lPaddle.x - lPaddle.width / 2;
+      var lPaddleYBool = this.y - this.height / 2 <= lPaddle.y + lPaddle.height / 2 && this.y + this.height / 2 >= lPaddle.y - lPaddle.height / 2;
+      if (lPaddleXBool && lPaddleYBool) {
+        this.flipX();
 
-				var newY = (this.y - lPaddle.y) / lPaddle.height * 3;
+        var newY = (this.y - lPaddle.y) / lPaddle.height * 3;
 
-				this.velocityY = newY;
-			}
+        this.velocityY = newY;
+      }
 
-			//lright paddle
-			var rPaddle = drawList.rightPaddle;
+      //lright paddle
+      var rPaddle = drawList.rightPaddle;
 
-			var rPaddleXBool = this.x + this.width / 2 >= rPaddle.x - rPaddle.width / 2 && this.x - this.width / 2 <= rPaddle.x + rPaddle.width / 2;
-			var rPaddleYBool = this.y - this.height / 2 <= rPaddle.y + rPaddle.height / 2 && this.y + this.height / 2 >= rPaddle.y - rPaddle.height / 2;
-			if (rPaddleXBool && rPaddleYBool) {
-				this.flipX();
+      var rPaddleXBool = this.x + this.width / 2 >= rPaddle.x - rPaddle.width / 2 && this.x - this.width / 2 <= rPaddle.x + rPaddle.width / 2;
+      var rPaddleYBool = this.y - this.height / 2 <= rPaddle.y + rPaddle.height / 2 && this.y + this.height / 2 >= rPaddle.y - rPaddle.height / 2;
+      if (rPaddleXBool && rPaddleYBool) {
+        this.flipX();
 
-				var _newY = (this.y - rPaddle.y) / rPaddle.height * 3;
+        var _newY = (this.y - rPaddle.y) / rPaddle.height * 3;
 
-				this.velocityY = _newY;
-			}
-		}
-	}, {
-		key: "flipY",
-		value: function flipY() {
-			this.velocityY *= -1;
+        this.velocityY = _newY;
+      }
+    }
+  }, {
+    key: "flipY",
+    value: function flipY() {
+      this.velocityY *= -1;
 
-			//    this.increaseVelocityMult();
-		}
-	}, {
-		key: "flipX",
-		value: function flipX() {
-			this.velocityX *= -1;
+      //    this.increaseVelocityMult();
+    }
+  }, {
+    key: "flipX",
+    value: function flipX() {
+      this.velocityX *= -1;
 
-			//    this.increaseVelocityMult();
-		}
-	}]);
+      pongAudio.play();
+      //    this.increaseVelocityMult();
+    }
+  }]);
 
-	return Puck;
+  return Puck;
 }();

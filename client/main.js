@@ -8,11 +8,24 @@ let drawList = {};
 let host = {};
 let mouseLocs = {};
 let inRoom = false;
+let codyImg;
+let codyAudio;
+let pongAudio;
+let pongScoreAudio;
+let name;
 
 
 const init = () => {
   //socket stuff
   socket = io.connect();
+
+  codyImg = new Image();
+  codyImg.src = './assets/assetsMedia/img/codyHouse.png';
+
+  codyAudio = new Audio('./assets/assetsMedia/audio/song.mp3');
+  pongAudio = new Audio('./assets/assetsMedia/audio/pong.wav');
+  pongScoreAudio = new Audio('./assets/assetsMedia/audio/pongScore.wav');
+
 
   socket.on('connect', ()=>{
     console.log('connected to the server');
@@ -128,7 +141,7 @@ const leaveRoom = () =>{
 
   //reset values to beginning
   document.querySelector("#p2Ele").innerHTML = '...';
-  
+
   //left paddle
   drawList.leftPaddle.score = 0;
 
@@ -158,8 +171,12 @@ const joinButton = () =>{
   }
 
   if(document.querySelector("#usernameField").value) {
+    name = document.querySelector("#usernameField").value;
+    if(name === 'Cody'|| name === 'cody'){
+      codyAudio.play();
+    }
     socket.emit('join', {
-      name: document.querySelector("#usernameField").value,
+      name: name,
     });
 
   } else {
@@ -386,6 +403,10 @@ const update = () => {
 
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,canvas.width, canvas.height);
+
+  if(name === 'Cody'|| name === 'cody'){
+    ctx.drawImage(codyImg,0,0,canvas.width, canvas.height);
+  }
 
   if(currentScene === "find"){
     findScreen();
