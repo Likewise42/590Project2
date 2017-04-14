@@ -186,7 +186,6 @@ const joinButton = () =>{
 
 const joinRoomButton = () => {
 
-
   if(document.querySelector("#joinField").value.indexOf('<') > -1){
     alert("Invalid Character!");
     return;
@@ -197,6 +196,8 @@ const joinRoomButton = () => {
     socket.emit('joinRoom', {
       name: document.querySelector("#joinField").value,
     });
+    
+    document.querySelector("#joinField").value = '';
 
   } else {
     alert("You must enter a roomname!");
@@ -213,6 +214,8 @@ const hostRoomButton = () => {
     socket.emit('hostRoom', {
       name: document.querySelector("#hostField").value,
     });
+    
+    document.querySelector("#hostField").value = '';
 
   } else {
     alert("You must enter a room name!");

@@ -194,6 +194,8 @@ var joinRoomButton = function joinRoomButton() {
     socket.emit('joinRoom', {
       name: document.querySelector("#joinField").value
     });
+
+    document.querySelector("#joinField").value = '';
   } else {
     alert("You must enter a roomname!");
   }
@@ -209,6 +211,8 @@ var hostRoomButton = function hostRoomButton() {
     socket.emit('hostRoom', {
       name: document.querySelector("#hostField").value
     });
+
+    document.querySelector("#hostField").value = '';
   } else {
     alert("You must enter a room name!");
   }
