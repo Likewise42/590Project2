@@ -42,7 +42,7 @@ var init = function init() {
     });
 
     socket.on('nameInvalid', function (data) {
-      document.querySelector("#nameAlert").style.display = "block";
+      alert('Name already in use!');
     });
 
     socket.on('roomHosted', function (data) {

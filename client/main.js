@@ -42,7 +42,7 @@ const init = () => {
     });
 
     socket.on('nameInvalid', (data)=>{
-      document.querySelector("#nameAlert").style.display = "block";
+      alert('Name already in use!');
     });
 
     socket.on('roomHosted',(data)=>{
