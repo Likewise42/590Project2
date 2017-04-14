@@ -23,7 +23,7 @@ var init = function init() {
   codyImg = new Image();
   codyImg.src = './assets/assetsMedia/img/codyHouse.png';
 
-  codyAudio = new Audio('./assets/assetsMedia/audio/song.mp3');
+  codyAudio = new Audio('./assets/assetsMedia/audio/cory.mp3');
   pongAudio = new Audio('./assets/assetsMedia/audio/pong.wav');
   pongScoreAudio = new Audio('./assets/assetsMedia/audio/pongScore.wav');
 
@@ -37,7 +37,6 @@ var init = function init() {
 
     socket.on('nameValid', function (data) {
       document.querySelector("#usernameRow").style.display = "none";
-      document.querySelector("#nameAlert").style.display = "none";
       document.querySelector("#joinHostRow").style.display = "block";
     });
 
